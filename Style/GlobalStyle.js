@@ -5,5 +5,6 @@ export default StyleSheet.create({
     flex: 1,
     backgroundColor: "white",
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+    paddingBottom: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
 });

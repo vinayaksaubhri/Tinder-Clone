@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
-import React from "react";
+import React, { useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
 import useAuth from "../Hooks/useAuth";
 import GlobalStyle from "../Style/GlobalStyle";
@@ -17,6 +17,7 @@ import { DUMMY_DATA } from "../DummyData";
 const HomeScreen = () => {
   const Navigation = useNavigation();
   const { logout, user } = useAuth();
+  const swipeRef = useRef(null);
   return (
     <SafeAreaView style={GlobalStyle.AndroidSafeArea}>
       {/* Start of the header */}
@@ -60,6 +61,13 @@ const HomeScreen = () => {
           cardIndex={0}
           animateCardOpacity
           verticalSwipe={false}
+          ref={swipeRef}
+          onSwipedLeft={() => {
+            console.log("Left");
+          }}
+          onSwipedRight={() => {
+            console.log("Right");
+          }}
           overlayLabels={{
             left: {
               title: "NOPE",
@@ -124,7 +132,9 @@ const HomeScreen = () => {
                 }}
               >
                 <View>
-                  <Text style={{ fontSize: 20, fontWeight: "700" }}>
+                  <Text
+                    style={{ fontSize: 20, fontWeight: "700", marginBottom: 2 }}
+                  >
                     {card.firstName} {card.lastName}
                   </Text>
                   <Text>{card.occupation}</Text>
@@ -138,6 +148,38 @@ const HomeScreen = () => {
             </View>
           )}
         />
+      </View>
+      <View style={{ flexDirection: "row", justifyContent: "space-evenly" }}>
+        <TouchableOpacity
+          onPress={() => {
+            swipeRef.current.swipeLeft();
+          }}
+          style={{
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 64,
+            width: 64,
+            height: 64,
+            backgroundColor: "rgb(254, 202, 202)",
+          }}
+        >
+          <Entypo name="cross" size={24} color="red" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            swipeRef.current.swipeRight();
+          }}
+          style={{
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 64,
+            width: 64,
+            height: 64,
+            backgroundColor: "rgb(187,247,208)",
+          }}
+        >
+          <AntDesign name="heart" size={24} color="green" />
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
