@@ -35,7 +35,11 @@ const HomeScreen = () => {
             source={{ uri: user.photoURL }}
           />
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            Navigation.navigate("Modal");
+          }}
+        >
           <Image
             style={{ height: 56, width: 56 }}
             resizeMode="contain"
