@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import useAuth from "../Hooks/useAuth";
 import GlobalStyle from "../Style/GlobalStyle";
@@ -15,8 +15,9 @@ import Swiper from "react-native-deck-swiper";
 import { DUMMY_DATA } from "../DummyData";
 import Card from "./Components/Card";
 import LastCard from "./Components/LastCard";
-import { onValue, ref } from "firebase/database";
+import { child, get, onValue, ref } from "firebase/database";
 import { database, db } from "../Firebase";
+import { collection } from "firebase/firestore";
 
 const HomeScreen = () => {
   const Navigation = useNavigation();
@@ -32,6 +33,23 @@ const HomeScreen = () => {
     });
     return unSub;
   }, []);
+
+  useEffect(() => {
+    let unSub;
+    const fetchCard = async () => {
+      onValue(ref(database, "users"), (snapshot) => {
+        const doc_profile = Object.values(snapshot.val())
+          .filter((doc) => doc.id !== user.uid)
+          .map((doc) => ({
+            id: doc.id,
+            ...doc,
+          }));
+        setProfile(doc_profile);
+      });
+    };
+    fetchCard();
+  }, []);
+
   return (
     <SafeAreaView style={GlobalStyle.AndroidSafeArea}>
       {/* Start of the header */}
@@ -80,12 +98,8 @@ const HomeScreen = () => {
           animateCardOpacity
           verticalSwipe={false}
           ref={swipeRef}
-          onSwipedLeft={() => {
-            console.log("Left");
-          }}
-          onSwipedRight={() => {
-            console.log("Right");
-          }}
+          onSwipedLeft={() => {}}
+          onSwipedRight={() => {}}
           overlayLabels={{
             left: {
               title: "NOPE",

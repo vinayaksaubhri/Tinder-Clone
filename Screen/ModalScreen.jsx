@@ -28,7 +28,7 @@ const ModalScreen = () => {
   }, []);
 
   const updateUserProfile = () => {
-    const ContactRef = ref(database, "Package");
+    const ContactRef = ref(database, "users");
     const newContactRef = push(ContactRef);
     set(newContactRef, {
       id: user.uid,

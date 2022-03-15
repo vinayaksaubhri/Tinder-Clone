@@ -26,8 +26,7 @@ const LastCard = () => {
       </Text>
       <Image
         style={{ height: 80, width: "100%" }}
-        height={100}
-        width={100}
+        resizeMode="contain"
         source={{ uri: "https://links.papareact.com/6gb" }}
       />
     </View>

@@ -54,9 +54,9 @@ const Card = ({ card }) => {
               marginBottom: 2,
             }}
           >
-            {card.firstName} {card.lastName}
+            {card.displayName}
           </Text>
-          <Text>{card.occupation}</Text>
+          <Text>{card.job}</Text>
         </View>
         <View>
           <Text style={{ fontSize: 24, fontWeight: "700" }}>{card.age}</Text>
