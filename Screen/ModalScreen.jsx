@@ -1,7 +1,12 @@
 import { View, Text, Image, TextInput, TouchableOpacity } from "react-native";
-import React, { useState } from "react";
+import React, { useLayoutEffect, useState } from "react";
 import GlobalStyle from "../Style/GlobalStyle";
 import useAuth from "../Hooks/useAuth";
+import { useNavigation } from "@react-navigation/native";
+// import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { database, db } from "../Firebase";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { push, ref, set } from "firebase/database";
 
 const ModalScreen = () => {
   const { user } = useAuth();
@@ -9,6 +14,37 @@ const ModalScreen = () => {
   const [job, setJob] = useState(null);
   const [age, setAge] = useState(null);
   const incompleteForm = !image || !job || !age;
+  const Navigation = useNavigation();
+
+  useLayoutEffect(() => {
+    Navigation.setOptions({
+      headerShown: "true",
+      headerTitle: "Update your profile",
+      headerStyle: {
+        backgroundColor: "#ff5864",
+      },
+      headerTitleStyle: { color: "white" },
+    });
+  }, []);
+
+  const updateUserProfile = () => {
+    const ContactRef = ref(database, "Package");
+    const newContactRef = push(ContactRef);
+    set(newContactRef, {
+      id: user.uid,
+      displayName: user.displayName,
+      photoURL: image,
+      job: job,
+      age: age,
+      timesStamp: serverTimestamp(),
+    })
+      .then(() => {
+        Navigation.navigate("Home");
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
+  };
   return (
     <View style={{ ...GlobalStyle.AndroidSafeArea, paddingBottom: 0 }}>
       <View style={{ alignItems: "center", flex: 1 }}>
@@ -90,6 +126,7 @@ const ModalScreen = () => {
               incompleteForm ? "rgb(156,163,175)" : "rgb(248,113,113)"
             }`,
           }}
+          onPress={updateUserProfile}
         >
           <Text
             style={{
