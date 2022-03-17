@@ -15,9 +15,9 @@ import Swiper from "react-native-deck-swiper";
 import { DUMMY_DATA } from "../DummyData";
 import Card from "./Components/Card";
 import LastCard from "./Components/LastCard";
-import { child, get, onValue, ref } from "firebase/database";
+import { child, get, onValue, push, ref, set } from "firebase/database";
 import { database, db } from "../Firebase";
-import { collection } from "firebase/firestore";
+import { collection, doc, query, setDoc, where } from "firebase/firestore";
 
 const HomeScreen = () => {
   const Navigation = useNavigation();
@@ -26,7 +26,7 @@ const HomeScreen = () => {
   const [profile, setProfile] = useState([]);
 
   useLayoutEffect(() => {
-    const unSub = onValue(ref(database, "users", user.uid), (snapshot) => {
+    const unSub = onValue(ref(database, "users/", user.uid), (snapshot) => {
       if (!snapshot.exists()) {
         Navigation.navigate("Modal");
       }
@@ -37,19 +37,64 @@ const HomeScreen = () => {
   useEffect(() => {
     let unSub;
     const fetchCard = async () => {
+      let passes = [];
+      let swipes = [];
+      onValue(
+        ref(database, "users/" + user.uid + "/" + "passes"),
+        (snapshot) => {
+          if (snapshot.exists())
+            passes = Object.values(snapshot.val()).map((doc) => doc.id);
+        }
+      );
+
+      onValue(
+        ref(database, "users/" + user.uid + "/" + "swipes"),
+        (snapshot) => {
+          if (snapshot.exists())
+            swipes = Object.values(snapshot.val()).map((doc) => doc.id);
+        }
+      );
+
       onValue(ref(database, "users"), (snapshot) => {
         const doc_profile = Object.values(snapshot.val())
+          .filter((doc) => {
+            if (passes.includes(doc.id) || swipes.includes(doc.id)) {
+              return false;
+            } else {
+              return true;
+            }
+          })
           .filter((doc) => doc.id !== user.uid)
           .map((doc) => ({
             id: doc.id,
             ...doc,
           }));
+        console.log("doc_profile", doc_profile);
         setProfile(doc_profile);
       });
+      return unSub;
     };
     fetchCard();
   }, []);
 
+  const swipeLeft = (cardIndex) => {
+    if (!profile[cardIndex]) return;
+
+    const userSwiped = profile[cardIndex];
+    set(
+      ref(database, "users/" + user.uid + "/" + "passes/" + userSwiped.id),
+      userSwiped
+    );
+  };
+  const swipeRight = (cardIndex) => {
+    if (!profile[cardIndex]) return;
+
+    const userSwiped = profile[cardIndex];
+    set(
+      ref(database, "users/" + user.uid + "/" + "swipes/" + userSwiped.id),
+      userSwiped
+    );
+  };
   return (
     <SafeAreaView style={GlobalStyle.AndroidSafeArea}>
       {/* Start of the header */}
@@ -98,8 +143,12 @@ const HomeScreen = () => {
           animateCardOpacity
           verticalSwipe={false}
           ref={swipeRef}
-          onSwipedLeft={() => {}}
-          onSwipedRight={() => {}}
+          onSwipedLeft={(cardIndex) => {
+            swipeLeft(cardIndex);
+          }}
+          onSwipedRight={(cardIndex) => {
+            swipeRight(cardIndex);
+          }}
           overlayLabels={{
             left: {
               title: "NOPE",

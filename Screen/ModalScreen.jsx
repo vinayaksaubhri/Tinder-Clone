@@ -3,7 +3,6 @@ import React, { useLayoutEffect, useState } from "react";
 import GlobalStyle from "../Style/GlobalStyle";
 import useAuth from "../Hooks/useAuth";
 import { useNavigation } from "@react-navigation/native";
-// import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { database, db } from "../Firebase";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { push, ref, set } from "firebase/database";
@@ -28,9 +27,8 @@ const ModalScreen = () => {
   }, []);
 
   const updateUserProfile = () => {
-    const ContactRef = ref(database, "users");
-    const newContactRef = push(ContactRef);
-    set(newContactRef, {
+    const ContactRef = ref(database, "users/" + user.uid);
+    set(ContactRef, {
       id: user.uid,
       displayName: user.displayName,
       photoURL: image,
