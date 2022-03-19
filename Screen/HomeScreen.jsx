@@ -17,7 +17,15 @@ import Card from "./Components/Card";
 import LastCard from "./Components/LastCard";
 import { child, get, onValue, push, ref, set } from "firebase/database";
 import { database, db } from "../Firebase";
-import { collection, doc, query, setDoc, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  query,
+  serverTimestamp,
+  setDoc,
+  where,
+} from "firebase/firestore";
+import generateId from "../Lib/generateID";
 
 const HomeScreen = () => {
   const Navigation = useNavigation();
@@ -26,7 +34,8 @@ const HomeScreen = () => {
   const [profile, setProfile] = useState([]);
 
   useLayoutEffect(() => {
-    const unSub = onValue(ref(database, "users/", user.uid), (snapshot) => {
+    const unSub = onValue(ref(database, "users/" + user.uid), (snapshot) => {
+      console.log("working", snapshot);
       if (!snapshot.exists()) {
         Navigation.navigate("Modal");
       }
@@ -58,18 +67,20 @@ const HomeScreen = () => {
       onValue(ref(database, "users"), (snapshot) => {
         const doc_profile = Object.values(snapshot.val())
           .filter((doc) => {
-            if (passes.includes(doc.id) || swipes.includes(doc.id)) {
+            if (
+              passes.includes(doc.id) ||
+              swipes.includes(doc.id) ||
+              doc.id === user.uid
+            ) {
               return false;
             } else {
               return true;
             }
           })
-          .filter((doc) => doc.id !== user.uid)
           .map((doc) => ({
             id: doc.id,
             ...doc,
           }));
-        console.log("doc_profile", doc_profile);
         setProfile(doc_profile);
       });
       return unSub;
@@ -93,6 +104,37 @@ const HomeScreen = () => {
     set(
       ref(database, "users/" + user.uid + "/" + "swipes/" + userSwiped.id),
       userSwiped
+    );
+    let loginInProfile;
+    onValue(ref(database, "users/" + user.uid), (snapshot) => {
+      if (snapshot.exists()) loginInProfile = Object.values(snapshot.val());
+    });
+    onValue(
+      ref(database, "users/" + userSwiped.id + "/" + "swipes/" + user.uid),
+      (snapshot) => {
+        if (snapshot.exists()) {
+          console.log(`You have matched with ${userSwiped.displayName}`);
+          set(
+            ref(
+              database,
+              "users/" + user.uid + "/" + "swipes/" + userSwiped.id
+            ),
+            userSwiped
+          );
+          set(ref(database, "matches/" + generateId(user.uid, userSwiped.id)), {
+            users: {
+              [user.uid]: loginInProfile,
+              [userSwiped.id]: userSwiped,
+            },
+            usersMatched: [user.uid, userSwiped.id],
+            timestamp: serverTimestamp(),
+          });
+          Navigation.navigate("Match", {
+            loginInProfile,
+            userSwiped,
+          });
+        }
+      }
     );
   };
   return (
