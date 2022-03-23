@@ -35,7 +35,6 @@ const HomeScreen = () => {
 
   useLayoutEffect(() => {
     const unSub = onValue(ref(database, "users/" + user.uid), (snapshot) => {
-      console.log("working", snapshot);
       if (!snapshot.exists()) {
         Navigation.navigate("Modal");
       }
