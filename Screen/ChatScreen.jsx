@@ -1,11 +1,15 @@
-import { View, Text } from "react-native";
+import { View, Text, SafeAreaView } from "react-native";
 import React from "react";
+import GlobalStyle from "../Style/GlobalStyle";
+import Header from "./Components/Header";
+import ChatList from "./Components/ChatList";
 
 const ChatScreen = () => {
   return (
-    <View>
-      <Text>ChatScreen</Text>
-    </View>
+    <SafeAreaView style={GlobalStyle.AndroidSafeArea}>
+      <Header title="Chat" />
+      <ChatList />
+    </SafeAreaView>
   );
 };
 
